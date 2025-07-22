@@ -130,35 +130,40 @@ Get-AzNetworkInterface -Name LabNIC -ResourceGroupName LabResourceGrp |
 
 ### Step 4: Create Linux VM with Nginx Script
 **Action:**
-```powershell
-# Credentials for VM admin
-$cred = Get-Credential -Message "Enter VM admin credentials"
+```bash
+# variables
+RG="LabResourceGrp"
+LOC="eastus"
+VNET="LabVNet"
+SUBNET="LabSubnet"
+NSG="LabNSG"
+PIP="LabPublicIP"
+NIC="LabNIC"
+VM="LinuxWebVM"
+IMG="Canonical:UbuntuServer:18.04-LTS:latest"
+SSH_KEY_PATH="$HOME/.ssh/id_rsa.pub"
 
 #Create cloud-init-nginx.yml file
-@"
+cat <<EOF > cloud-init-nginx.yml
 #cloud-config
 packages:
   - nginx
 runcmd:
   - systemctl enable nginx
   - systemctl start nginx
-"@ > .\cloud-init-nginx.yml
+EOF
 
-# Check directory for cloud-init-nginx.yml file
-Test-Path .\cloud-init-nginx.yml
-
-# Read cloud-init file
-$customData = Get-Content -Raw -Path .\cloud-init-nginx.yml
-
-# VM Configuration
-$vmConfig = New-AzVMConfig -VMName LinuxWebVM -VMSize Standard_DS1_v2 `
-  | Set-AzVMOperatingSystem -Linux -ComputerName LinuxWebVM -Credential $cred `
-  | Set-AzVMSourceImage -PublisherName Canonical -Offer UbuntuServer -Skus 18.04-LTS -Version latest `
-  | Add-AzVMNetworkInterface -Id $nic.Id
-
-# Create VM with custom data
-New-AzVm -ResourceGroupName LabResourceGrp -Location EastUS `
-  -VM $vmConfig -CustomData $customData
+# Create VM
+az vm create \
+  --resource-group LabResourceGrp \
+  --name LinuxWebVM \
+  --location eastus \
+  --nics LabNIC \
+  --image Ubuntu2204 \
+  --size Standard_DS1_v2 \
+  --admin-username azureuser \
+  --generate-ssh-keys \
+  --custom-data cloud-init-nginx.yml
 ```
 
 **Explanation:**
