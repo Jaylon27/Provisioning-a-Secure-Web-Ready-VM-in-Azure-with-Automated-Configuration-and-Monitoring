@@ -134,6 +134,19 @@ Get-AzNetworkInterface -Name LabNIC -ResourceGroupName LabResourceGrp |
 # Credentials for VM admin
 $cred = Get-Credential -Message "Enter VM admin credentials"
 
+#Create cloud-init-nginx.yml file
+@"
+#cloud-config
+packages:
+  - nginx
+runcmd:
+  - systemctl enable nginx
+  - systemctl start nginx
+"@ > .\cloud-init-nginx.yml
+
+# Check directory for cloud-init-nginx.yml file
+Test-Path .\cloud-init-nginx.yml
+
 # Read cloud-init file
 $customData = Get-Content -Raw -Path .\cloud-init-nginx.yml
 
@@ -146,15 +159,6 @@ $vmConfig = New-AzVMConfig -VMName LinuxWebVM -VMSize Standard_DS1_v2 `
 # Create VM with custom data
 New-AzVm -ResourceGroupName LabResourceGrp -Location EastUS `
   -VM $vmConfig -CustomData $customData
-```
-**cloud-init-nginx.yml:**
-```yaml
-#cloud-config
-packages:
-  - nginx
-runcmd:
-  - systemctl enable nginx
-  - systemctl start nginx
 ```
 
 **Explanation:**
