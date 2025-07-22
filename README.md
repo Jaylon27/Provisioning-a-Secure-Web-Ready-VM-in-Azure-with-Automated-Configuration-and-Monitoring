@@ -102,7 +102,7 @@ $pip = New-AzPublicIpAddress `
   -Name LabPublicIP `
   -ResourceGroupName LabResourceGrp `
   -Location EastUS `
-  -AllocationMethod Dynamic
+  -AllocationMethod Static
 
 # Retrieve subnet and NSG objects
 $subnet = (Get-AzVirtualNetwork -Name LabVNet -ResourceGroupName LabResourceGrp).Subnets |
