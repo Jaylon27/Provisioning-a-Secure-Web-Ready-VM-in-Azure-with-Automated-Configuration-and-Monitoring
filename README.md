@@ -77,7 +77,7 @@ $rule = New-AzNetworkSecurityRuleConfig `
   -SourceAddressPrefix * `
   -SourcePortRange * `
   -DestinationAddressPrefix * `
-  -DestinationPortRange "22","443"
+  -DestinationPortRange "22","80","443"
 
 $nsg.SecurityRules.Add($rule)
 $nsg | Set-AzNetworkSecurityGroup
@@ -171,8 +171,8 @@ Builds a Linux VM, injects cloud-init to install/start Nginx for consistent web 
 
 **Validation:**
 ```powershell
-$ip = (Get-AzPublicIpAddress -Name LabPublicIP -ResourceGroupName LabResourceGrp).IpAddress
-# Then in browser: https://$ip
+( Get-AzPublicIpAddress -Name LabPublicIP -ResourceGroupName LabResourceGrp ).IpAddress
+# Then in browser: https://ipaddress
 ```
 
 ### Step 5: Enable Azure Monitor Diagnostics
