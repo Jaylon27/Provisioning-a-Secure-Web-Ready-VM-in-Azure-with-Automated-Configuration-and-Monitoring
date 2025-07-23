@@ -182,25 +182,21 @@ Builds a Linux VM, injects cloud-init to install/start Nginx for consistent web 
 $workspace = New-AzOperationalInsightsWorkspace `
   -ResourceGroupName LabResourceGrp `
   -Name LabLogs `
-  -Location EastUS `
-  -Sku Standard
+  -Location EastUS
 
 # Get VM resource ID
 $vm = Get-AzVM -ResourceGroupName LabResourceGrp -Name LinuxWebVM
 
 # Configure diagnostics
-Set-AzDiagnosticSetting `
-  -ResourceId $vm.Id `
+New-AzDiagnosticSetting `
+  -ResourceId  $vm.Id `
   -WorkspaceId $workspace.ResourceId `
-  -Name VMMonitoring `
-  -MetricCategory AllMetrics `
-  -Enabled $true `
-  -Category Syslog `
-  -Enabled $true
+  -Name        'VMMonitoring-MetricsOnly' `
+  -Metric      @(@{ Category = 'AllMetrics'; Enabled = $true })
 ```
 
 **Explanation:**
-Creates a Log Analytics workspace and pushes VM metrics/logs to Azure Monitor for ongoing analysis.
+Creates a Log Analytics workspace and pushes VM metrics to Azure Monitor for ongoing analysis.
 
 **Validation:**
 Open Azure Portal → Monitor → Logs → run:
@@ -242,7 +238,7 @@ sudo cat /var/log/cloud-init-output.log
 
 ## 8. Knowledge-Retention Activities
 ### Reflection Questions
-1. How does ```Set-AzDiagnosticSetting``` integrate with Log Analytics to surface VM metrics?
+1. How does ```New-AzDiagnosticSetting``` integrate with Log Analytics to surface VM metrics?
 
 2. Why might you use a custom image over cloud-init for production deployments?
 
@@ -253,7 +249,7 @@ sudo cat /var/log/cloud-init-output.log
 1. **What ports are allowed in this lab's NSG?**
 
 - A. 22 and 80
-- B. 22 and 443 ✅
+- B. 22 and 443 
 - C. 80 and 443
 - D. 3389 and 443
 
